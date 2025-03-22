@@ -15,8 +15,15 @@ def clear_screen() -> None:
     os.system('cls' if os.name == 'nt' else 'clear')
 
 
-def print_board(board, scores, turn_result="", highlight_cells=[]):
-    """Display the scoreboard and game board with colors."""
+def print_board(board: list, scores: dict, turn_result: str = "", highlight_cells: list = []) -> None:
+    """Display the scoreboard and game board with colors.
+
+    Args:
+        board (list): The main board of the game.
+        scores (dict): Scores earned by each user.
+        turn_result (str, optional): A message to display the game result. Defaults to "".
+        highlight_cells (list, optional): Highlighted cells. Defaults to [].
+    """
     clear_screen()
     player1, player2 = list(scores.keys())
 
@@ -43,8 +50,16 @@ def print_board(board, scores, turn_result="", highlight_cells=[]):
         print("-" * 9)
 
 
-def check_winner(board, player):
-    """Check if the given player has won."""
+def check_winner(board: list, player: str) -> bool:
+    """Check if the given player has won.
+
+    Args:
+        board (list): The main board of the game.
+        player (str): Player's symbol.
+
+    Returns:
+        bool: Return True if the given player has won.
+    """
     for i in range(3):
         if all(board[i][j] == player for j in range(3)) or all(board[j][i] == player for j in range(3)):
             return True
@@ -53,34 +68,69 @@ def check_winner(board, player):
     return False
 
 
-def is_full(board):
-    """Check if the board is completely filled."""
+def is_full(board: list) -> bool:
+    """Check if the board is completely filled.
+
+    Args:
+        board (list): The main board of the game.
+
+    Returns:
+        bool: Return True if the board is completely filled.
+    """
     return all(board[i][j] in ["X", "O"] for i in range(3) for j in range(3))
 
 
-def get_available_moves(board):
-    """Return a list of available moves."""
+def get_available_moves(board: list) -> list:
+    """Return a list of available moves.
+
+    Args:
+        board (list): The main board of the game.
+
+    Returns:
+        list: A list of available moves.
+    """
     return [(i, j) for i in range(3) for j in range(3) if board[i][j] not in ["X", "O"]]
 
 
-def is_draw_situation(board, computer_symbol, player_symbol):
-    """Check if all possible moves lead to a draw."""
-    for row, col in get_available_moves(board):
-        board[row][col] = computer_symbol
+def is_draw_situation(board: list, computer_symbol: str, player_symbol: str) -> bool:
+    """Check if all possible moves lead to a draw.
+
+    Args:
+        board (list): The main board of the game.
+        computer_symbol (str): Computer game symbol.
+        player_symbol (str): Player game symbol.
+
+    Returns:
+        bool: Return True if all possible moves lead to a draw.
+    """
+    for row, column in get_available_moves(board):
+        board[row][column] = computer_symbol
         if check_winner(board, computer_symbol):
-            board[row][col] = str(row * 3 + col + 1)
+            board[row][column] = str(row * 3 + column + 1)
             return False
-        board[row][col] = player_symbol
+        board[row][column] = player_symbol
         if check_winner(board, player_symbol):
-            board[row][col] = str(row * 3 + col + 1)
+            board[row][column] = str(row * 3 + column + 1)
             return False
-        board[row][col] = str(row * 3 + col + 1)  # Reset to original value
+        # Reset to original value
+        board[row][column] = str(row * 3 + column + 1)
 
     return True  # No winning move exists for either player
 
 
-def minimax(board, depth, is_maximizing, computer_symbol, player_symbol):
-    """Minimax algorithm to determine the best move for the computer."""
+def minimax(board: list, depth: int, is_maximizing: bool, computer_symbol: str, player_symbol: str) -> int:
+    """Minimax algorithm to determine the best move for the computer.
+
+    Args:
+        board (list): The main board of the game.
+        depth (int): Current level of return in the game tree.
+        is_maximizing (bool): When is_maximizing is True, the algorithm is in a state where it is trying to find the best possible move for the maximizing player.
+        computer_symbol (str): Computer game symbol.
+        player_symbol (str): Player game symbol.
+
+    Returns:
+        int: return a value of a game state.
+    """
     if check_winner(board, computer_symbol):
         return 10 - depth
     if check_winner(board, player_symbol):
@@ -90,26 +140,36 @@ def minimax(board, depth, is_maximizing, computer_symbol, player_symbol):
 
     if is_maximizing:
         best_score = -float("inf")
-        for row, col in get_available_moves(board):
-            board[row][col] = computer_symbol
+        for row, column in get_available_moves(board):
+            board[row][column] = computer_symbol
             score = minimax(board, depth + 1, False,
                             computer_symbol, player_symbol)
-            board[row][col] = str(row * 3 + col + 1)
+            board[row][column] = str(row * 3 + column + 1)
             best_score = max(score, best_score)
         return best_score
     else:
         best_score = float("inf")
-        for row, col in get_available_moves(board):
-            board[row][col] = player_symbol
+        for row, column in get_available_moves(board):
+            board[row][column] = player_symbol
             score = minimax(board, depth + 1, True,
                             computer_symbol, player_symbol)
-            board[row][col] = str(row * 3 + col + 1)
+            board[row][column] = str(row * 3 + column + 1)
             best_score = min(score, best_score)
         return best_score
 
 
-def best_computer_move(board, computer_symbol, player_symbol, first_move=False):
-    """Find the best move for the computer using Minimax algorithm."""
+def best_computer_move(board: list, computer_symbol: list, player_symbol: list, first_move: bool = False) -> str:
+    """Find the best move for the computer using Minimax algorithm.
+
+    Args:
+        board (list): The main board of the game.
+        computer_symbol (list): Computer game symbol.
+        player_symbol (list): Player game symbol.
+        first_move (bool, optional): It should be True if it is the first move of the game. Defaults to False.
+
+    Returns:
+        str: Returns the computer's selected option.
+    """
     available_moves = get_available_moves(board)
 
     if len(available_moves) == 9:
@@ -117,16 +177,16 @@ def best_computer_move(board, computer_symbol, player_symbol, first_move=False):
 
     best_moves = []
     best_score = -float("inf")
-    for row, col in available_moves:
-        board[row][col] = computer_symbol
+    for row, column in available_moves:
+        board[row][column] = computer_symbol
         score = minimax(board, 0, False, computer_symbol, player_symbol)
-        board[row][col] = str(row * 3 + col + 1)
+        board[row][column] = str(row * 3 + column + 1)
 
         if score > best_score:
             best_score = score
-            best_moves = [(row, col)]
+            best_moves = [(row, column)]
         elif score == best_score:
-            best_moves.append((row, col))
+            best_moves.append((row, column))
 
     if first_move and len(best_moves) > 1:
         return random.choice(best_moves[:3])
@@ -145,15 +205,15 @@ def play_turn(
     """Play one turn of the game.
 
     Args:
-        player1 (str): _description_
-        player2 (str): _description_
-        symbols (dict): _description_
-        scores (dict): _description_
-        single_player (bool, optional): _description_. Defaults to False.
-        starting_player (str, optional): _description_. Defaults to None.
+        player1 (str): First player's name.
+        player2 (str): Second player's name.
+        symbols (dict): List of user symbols.
+        scores (dict): Scores earned by each user.
+        single_player (bool, optional): Game mode. Defaults to False.
+        starting_player (str, optional): Name of the player who started the game. Defaults to None.
 
     Returns:
-        str | None: _description_
+        str | None: If a user wins, it returns the user's name, and if there is a tie, it returns None.
     """
     board = [["1", "2", "3"], ["4", "5", "6"], ["7", "8", "9"]]
 
@@ -197,50 +257,73 @@ def play_turn(
         if check_winner(board, symbol):
             scores[current_player] += 1
             print_board(board, scores, f"{current_player} wins this turn!")
-            time.sleep(2)
+            time.sleep(5)
             return current_player
 
         if moves_count >= 5 and is_draw_situation(board, symbols[player2], symbols[player1]):
             print_board(board, scores,
                         "It's a draw! No one can win this turn.")
-            time.sleep(2)
+            time.sleep(5)
             return None
 
         if is_full(board):
             print_board(board, scores, "It's a tie! No one wins this turn.")
-            time.sleep(2)
+            time.sleep(5)
             return None
 
         current_player = player1 if current_player == player2 else player2
 
 
-def get_players(single_player: bool = False) -> list:
-    """_summary_
+def get_name(prompt: str = "Name: ", length: int = 3, empty: bool = False) -> str:
+    """A function to get a name from standard input.
 
     Args:
-        single_player (bool, optional): _description_. Defaults to False.
+        prompt (str, optional): The message displayed to the user. Defaults to "Name: ".
+        length (int, optional): Minimum length of the entered name. Defaults to 4.
+        empty (bool, optional): If True, the user can enter an empty value. Defaults to False.
 
     Returns:
-        list: _description_
+        str: Validated name.
+    """
+    while True:
+        name = input(prompt)
+        if name:
+            if name.isalpha() and len(name) >= length:
+                return name
+            else:
+                print(
+                    "ERROR: The name must be at least {length} characters and contain only alphabets.")
+        else:
+            print("ERROR: Name cannot be empty.")
+
+
+def get_players(single_player: bool = False) -> list:
+    """Depending on the game mode, it takes the names of one or two users from the input.
+
+    Args:
+        single_player (bool, optional): If true, it will only get one user.. Defaults to False.
+
+    Returns:
+        list: A list of user names.
     """
     if single_player:
-        player1 = input("Enter your name: ")
+        player1 = get_name("Enter your name: ")
         player2 = "Computer"
     else:
-        player1 = input("Enter name for Player 1: ")
-        player2 = input("Enter name for Player 2: ")
+        player1 = get_name("Enter name for Player 1: ")
+        player2 = get_name("Enter name for Player 2: ")
 
     return list((player1, player2))
 
 
 def get_turns(prompt: str = "Enter number of turns: ") -> int:
-    """_summary_
+    """This function takes the number of turns in the game from the user and returns the entered value as an integer if the user enters a valid integer.
 
     Args:
-        prompt (_type_, optional): _description_. Defaults to "Enter number of turns: ".
+        prompt (str, optional): The message that is displayed to the user. Defaults to "Enter number of turns: ".
 
     Returns:
-        int: _description_
+        int: Number of game turns.
     """
     while True:
         turns = input("Enter number of turns: ")
@@ -294,7 +377,7 @@ def main() -> None:
     while True:
         clear_screen()
         show_menu()
-        
+
         if error:
             print("ERROR: Please select a correct option.")
         choice = input("Select an option (1/2/3): ")
